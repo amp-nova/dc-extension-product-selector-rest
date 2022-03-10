@@ -11,7 +11,8 @@ export const params = {
   catalogs: [],
   backend: 'SFCC',
   noItemsText: 'No items selected.',
-  searchPlaceholderText: 'Search'
+  searchPlaceholderText: 'Search',
+  apiBaseUrl: ''
 };
 
 export function paramReducer(state = params, {type, value}) {

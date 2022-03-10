@@ -10,6 +10,7 @@ import { setInitialised } from '../initialised/initialised.actions';
 import { ProductSelectorError } from '../../ProductSelectorError';
 import { setTouched } from '../touched/touched.actions';
 import { setGlobalError } from '../global-error/global-error.actions';
+import _ from 'lodash';
 
 export const GET_SELECTED_ITEMS = 'GET_SELECTED_ITEMS';
 export const SET_SELECTED_ITEMS = 'SET_SELECTED_ITEMS';
@@ -42,7 +43,6 @@ export const toggleProduct = (item, isSelected) => async (dispatch, getState) =>
   dispatch(setTouched(true));
 
   const { selectedItems } = getState();
-
   dispatch(setValue(selectedItems));
 };
 
@@ -51,6 +51,10 @@ export const reorderItems = indexes => (dispatch, getState) => {
   const { selectedItems } = getState();
   dispatch(setValue(selectedItems));
 };
+
+export const reorderProducts = (selectedItems) => (dispatch, getState) => {
+  dispatch(setValue(selectedItems));
+}
 
 export const getSelectedItems = () => async (dispatch, getState) => {
   const state = getState();
@@ -75,7 +79,6 @@ export const getSelectedItems = () => async (dispatch, getState) => {
     }
 
     selectedItems = sortBy(selectedItems, ({ id }) => indexOf(ids, id));
-
     if (selectedItems.length !== ids.length) {
       dispatch(setValue(selectedItems));
     }
@@ -90,3 +93,9 @@ export const getSelectedItems = () => async (dispatch, getState) => {
     dispatch(setGlobalError('Could not get selected items'));
   }
 };
+
+export default {
+  getSelectedItems,
+  setSelectedItems,
+  reorderProducts
+}

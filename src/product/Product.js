@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { Clear } from '@material-ui/icons';
 import { Card, CardActionArea, CardMedia, CardHeader, IconButton, makeStyles } from '@material-ui/core';
 import { toggleProduct } from '../store/selectedItems/selectedItems.actions';
+import _ from 'lodash';
 
 import find from 'lodash/find';
 import FadeIn from '../fade-in/FadeIn';
@@ -39,7 +40,8 @@ export const ProductComponent = params => {
 	const [visible, setVisible] = useState(false);
 	const isRemovable = params.variant === 'removable';
 	const isSelected = Boolean(find(params.selectedItems, { id: params.item.id }));
-	const { readOnly } = params.SDK.form;
+	// const { readOnly } = params.SDK.form;
+	const readOnly = false;
 	const toggle = () => params.toggleProduct(params.item, isSelected);
 
 	const hideProduct = () => {
@@ -49,7 +51,9 @@ export const ProductComponent = params => {
 
 	useEffect(() => setVisible(true), []);
 
-	const { name, image } = params.item;
+	const { name, variants } = params.item;
+	const masterVariant = _.first(variants)
+	const image = _.get(_.first(masterVariant.images), 'url')
 
 	const classes = styles({
 		isSelected,

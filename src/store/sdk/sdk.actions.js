@@ -24,11 +24,11 @@ export const fetchSDK = () => async (dispatch, getState) => {
   dispatch(setFetching(true));
 
   try {
+    dispatch(initBackend());
     SDK = await init();
 
     dispatch(setSDK(SDK));
     dispatch(setParams(SDK.params));
-    dispatch(initBackend());
     const {params} = getState();
     
     if (params.catalogs.length) {

@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import get from 'lodash/get';
 import { connect } from 'react-redux';
-import { motion } from 'framer-motion';
+import { Reorder } from 'framer-motion';
 import { makeStyles, CircularProgress, Paper, Typography, Box } from '@material-ui/core';
 
-import { reorderItems } from '../store/selectedItems/selectedItems.actions';
-
-import Sortable from 'react-sortablejs';
 import FadeIn from '../fade-in/FadeIn';
 import Product from '../product/Product';
 import FormError from '../form-error/FormError';
 
+import { reorderItems, reorderProducts, toggleProduct, addItem, removeItem } from '../store/selectedItems/selectedItems.actions';
+
 import './selected-products.scss';
+import _ from 'lodash';
 
 const styles = makeStyles(theme => ({
   root: {
@@ -66,18 +66,46 @@ const styles = makeStyles(theme => ({
 }));
 
 export const SelectedProductsComponent = params => {
-  const [isDragging, setDragging] = useState(false);
   const { minItems, maxItems } = get(params.SDK, 'field.schema', {});
   const { readOnly } = get(params.SDK, 'form', {});
   const classes = styles({ readOnly });
   const showMinItemError = params.touched && minItems && params.selectedItems.length < minItems;
   const showMaxItemError = params.touched && maxItems && params.selectedItems.length > maxItems;
 
-  const items = params.selectedItems.length ? (
-    <ProductList selectedItems={params.selectedItems} classes={classes} isDragging={isDragging}/>
-  ) : (
-    <NoItems classes={classes} noItemsText={params.params.noItemsText} />
-  );
+  let itemsBlock = <></>
+  const [selectedItems, doSetSelectedItems] = useState(params.selectedItems);
+  const setSelectedItems = (items) => {
+    doSetSelectedItems(items)
+    params.reorderProducts(items)
+  }
+
+  if (!_.isEmpty(params.selectedItems)) {
+    if (_.isEmpty(selectedItems) || selectedItems.length !== params.selectedItems.length) {
+      setSelectedItems(params.selectedItems)
+    }
+  }
+
+  if (readOnly) {
+    itemsBlock = <div className={classes.items}>
+      <Typography component="div" variant="body1" className={classes.placeholder}>
+        <Box fontWeight="fontWeightLight">{params.params.noItemsText}</Box>
+      </Typography>
+    </div>
+  }
+  else {
+    itemsBlock = <Reorder.Group
+      values={selectedItems}
+      onReorder={setSelectedItems}
+      className={classes.items}
+      layoutScroll
+    >
+      {selectedItems.map((item) => {
+        return <Reorder.Item key={item.id} value={item} as="div" drag>
+          <Product className={classes.dragItem} item={item} variant="removable" />
+        </Reorder.Item>
+      })}
+    </Reorder.Group>
+  }
 
   return (
     <Paper className={'selected-products ' + classes.root}>
@@ -88,22 +116,7 @@ export const SelectedProductsComponent = params => {
       <Loading show={!params.initialised} className={classes.loader} />
 
       <FadeIn show={params.initialised}>
-        {readOnly && <div className={classes.items}>{items}</div>}
-        {!readOnly && (
-          <Sortable
-            onChange={(_, sortable, indexes) => params.reorderItems(indexes)}
-            className={classes.items}
-            options={{
-              animation: 150,
-              ghostClass: 'product-placeholder',
-              onStart: () => setDragging(true),
-              onEnd: () => setDragging(false)
-            }}
-          >
-            {items}
-          </Sortable>
-        )}
-        
+        {itemsBlock}
       </FadeIn>
 
       <div className={classes.errorWrapper}>
@@ -114,28 +127,14 @@ export const SelectedProductsComponent = params => {
   );
 };
 
-const ProductList = ({ selectedItems, classes, isDragging }) => {
-  return selectedItems.map(item => (
-    <motion.div positionTransition={isDragging ? null : {type: 'tween'}} key={item.id}>
-      <Product className={classes.dragItem} item={item} variant="removable" />
-    </motion.div>
-  ));
-};
-
 const Loading = ({ show, className }) => (
   <FadeIn
     show={show}
     className={className}
-    exitOptions={{position: 'absolute', zIndex: 3, top: '50%', marginTop: '-20px'}}
+    exitOptions={{ position: 'absolute', zIndex: 3, top: '50%', marginTop: '-20px' }}
   >
     <CircularProgress />
   </FadeIn>
-);
-
-const NoItems = ({ classes, noItemsText }) => (
-  <Typography component="div" variant="body1" className={classes.placeholder}>
-    <Box fontWeight="fontWeightLight">{noItemsText}</Box>
-  </Typography>
 );
 
 const SelectedProducts = connect(
@@ -147,7 +146,7 @@ const SelectedProducts = connect(
     backend: state.backend,
     initialised: state.initialised
   }),
-  { reorderItems }
+  { reorderItems, reorderProducts }
 )(SelectedProductsComponent);
 
 export default SelectedProducts;
