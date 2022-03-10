@@ -10,7 +10,6 @@ import { setInitialised } from '../initialised/initialised.actions';
 import { ProductSelectorError } from '../../ProductSelectorError';
 import { setTouched } from '../touched/touched.actions';
 import { setGlobalError } from '../global-error/global-error.actions';
-import _ from 'lodash';
 
 export const GET_SELECTED_ITEMS = 'GET_SELECTED_ITEMS';
 export const SET_SELECTED_ITEMS = 'SET_SELECTED_ITEMS';
@@ -94,8 +93,9 @@ export const getSelectedItems = () => async (dispatch, getState) => {
   }
 };
 
-export default {
+const operations = {
   getSelectedItems,
   setSelectedItems,
   reorderProducts
 }
+export default operations

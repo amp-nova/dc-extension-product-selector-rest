@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import get from 'lodash/get';
 import { connect } from 'react-redux';
 import { Reorder } from 'framer-motion';
@@ -8,7 +8,7 @@ import FadeIn from '../fade-in/FadeIn';
 import Product from '../product/Product';
 import FormError from '../form-error/FormError';
 
-import { reorderItems, reorderProducts, toggleProduct, addItem, removeItem } from '../store/selectedItems/selectedItems.actions';
+import { reorderItems, reorderProducts } from '../store/selectedItems/selectedItems.actions';
 
 import './selected-products.scss';
 import _ from 'lodash';
